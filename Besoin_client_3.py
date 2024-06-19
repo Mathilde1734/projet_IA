@@ -46,16 +46,24 @@ def predictions(data, param):
     predict = pd.DataFrame(param['modele'].predict_proba(data_changee), columns=["proba_inverse", "proba"])
     
     
-    index = data[(data["fk_arb_etat"] == 'SUPPRIMÉ') | 
-                      (data["fk_arb_etat"]=='ABATTU') | 
-                      (data["fk_arb_etat"]=='EN PLACE') | 
-                      (data["fk_arb_etat"]=='REMPLACÉ')].index
+    # index = data[(data["fk_arb_etat"] == 'SUPPRIMÉ') | 
+    #                   (data["fk_arb_etat"]=='ABATTU') | 
+    #                   (data["fk_arb_etat"]=='EN PLACE') | 
+    #                   (data["fk_arb_etat"]=='REMPLACÉ')].index
     
-    data.drop(index, inplace = True)
-
+    # data.drop(index, inplace = True)
+    
+    data['prediction'] = 0
+    index2 = data[(data["fk_arb_etat"] == "Essouché") | (data["fk_arb_etat"] == "Non essouché")].index
 
     # data.loc[(data["fk_arb_etat"] == "Essouché") | (data["fk_arb_etat"] == "Non essouché"), "prediction"] = predict["proba"]
-    data["prediction"] = predict['proba']
+    j=0
+    for i in index2:
+        data.loc[i, "prediction"] = predict.loc[j,"proba"]
+        j+=1
+
+    # data.loc[index2] = predict["proba"]
+    # data["prediction"] = predict['proba']
     # print(data["prediction"])
     return data
 
@@ -63,15 +71,16 @@ def predictions(data, param):
 def real_carte(data):
     carte = folium.Map(zoom_start=12, location=[49.8476780339,3.2866348474000002])
     colormap = cm.LinearColormap(colors=['green', 'red'], vmin = 0, vmax = 1)
-    data_prediction = predictions(data,param)
-    data_reste = data
+    data = predictions(data,param)
+    carte.add_child(colormap)
+    # data_reste = data
 
 
-    index = data_reste[(data_reste["fk_arb_etat"] == 'Essouché') | (data_reste["fk_arb_etat"]=='Non essouché')].index
+    # index = data_reste[(data_reste["fk_arb_etat"] == 'Essouché') | (data_reste["fk_arb_etat"]=='Non essouché')].index
     
-    data_reste.drop(index, inplace = True)
+    # data_reste.drop(index, inplace = True)
 
-    data = pd.concat([data_prediction, data_reste], axis = 1)
+    # data = pd.concat([data_prediction, data_reste], axis = 1)
     # print(data["prediction"].value_counts())
     
 
@@ -81,7 +90,7 @@ def real_carte(data):
             radius= (data.iloc[i]['tronc_diam']/3.1415)*0.05 + 1,
             fill = True,
             color = colormap(data.iloc[i]['prediction']),
-            # color = 'red' if (data.iloc[i]['prediction'] == 1) else 'green',
+            # color = 'red' if (data.iloc[i]['prediction'] >= 0.5) else 'green',
             popup= f'<div style="width : 200px">Position de l\'arbre : {data.iloc[i]['latitude'], data.iloc[i]['longitude']}<br>'
                   f'Remarquable : {data.iloc[i]['remarquable']}<br>'
                   f'Stade de développement : {data.iloc[i]['fk_stadedev']}<br>'
