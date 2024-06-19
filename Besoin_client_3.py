@@ -33,8 +33,6 @@ def encodage(data,param):
     data_prep.drop(index, inplace = True)
 
     data_reduit = data_prep[["haut_tot","haut_tronc","tronc_diam","age_estim", "fk_prec_estim","fk_pied","fk_situation"]]
-    print(len(data_reduit))
-    print(len(data))
     columns_enc=["fk_pied","fk_situation"]
     data_reduit[columns_enc] = param['encodeur'].transform(data_reduit[columns_enc])
 
