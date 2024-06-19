@@ -18,39 +18,77 @@ def changement(chemin_csv, chemin_json):
     return data
 
 arbre = changement('Données/Data_Arbre.csv','Données/Data_Arbre.json')
-# arbre = read_json('Données/Data_Arbre.json')
 
 param = pk.load(open('RandomForest_Besoin_client_3.pkl','rb'))
 
 
 def encodage(data,param):
-    data_encodee = param['encodeur'].transform(data.drop('fk_arb_etat', axis=1))
-    return data_encodee
+    data_prep=data.copy()
+
+    index = data_prep[(data_prep["fk_arb_etat"] == 'SUPPRIMÉ') | 
+                      (data_prep["fk_arb_etat"]=='ABATTU') | 
+                      (data_prep["fk_arb_etat"]=='EN PLACE') | 
+                      (data_prep["fk_arb_etat"]=='REMPLACÉ')].index
+    
+    data_prep.drop(index, inplace = True)
+
+    data_reduit = data_prep[["haut_tot","haut_tronc","tronc_diam","age_estim", "fk_prec_estim","fk_pied","fk_situation"]]
+    print(len(data_reduit))
+    print(len(data))
+    columns_enc=["fk_pied","fk_situation"]
+    data_reduit[columns_enc] = param['encodeur'].transform(data_reduit[columns_enc])
+
+    return data_reduit
 
 def predictions(data, param):
     data_changee = encodage(data, param)
-    data['prédictions'] = param['modele'].predict(data_changee)
-    return data
+    # print(data_changee)
+    predict = pd.DataFrame(param['modele'].predict_proba(data_changee), columns=["proba_inverse", "proba"])
+    
+    
+    index = data[(data["fk_arb_etat"] == 'SUPPRIMÉ') | 
+                      (data["fk_arb_etat"]=='ABATTU') | 
+                      (data["fk_arb_etat"]=='EN PLACE') | 
+                      (data["fk_arb_etat"]=='REMPLACÉ')].index
+    
+    data.drop(index, inplace = True)
 
+
+    # data.loc[(data["fk_arb_etat"] == "Essouché") | (data["fk_arb_etat"] == "Non essouché"), "prediction"] = predict["proba"]
+    data["prediction"] = predict['proba']
+    # print(data["prediction"])
+    return data
 
 
 def real_carte(data):
     carte = folium.Map(zoom_start=12, location=[49.8476780339,3.2866348474000002])
-    colormap = cm.LinearColormap(colors=['green', 'red'])
-    data = predictions(data,param)
+    colormap = cm.LinearColormap(colors=['green', 'red'], vmin = 0, vmax = 1)
+    data_prediction = predictions(data,param)
+    data_reste = data
+
+
+    index = data_reste[(data_reste["fk_arb_etat"] == 'Essouché') | (data_reste["fk_arb_etat"]=='Non essouché')].index
+    
+    data_reste.drop(index, inplace = True)
+
+    data = pd.concat([data_prediction, data_reste], axis = 1)
+    # print(data["prediction"].value_counts())
     
 
-    for i in (len(data)):
+    for i in range(len(data)):
         folium.Circle(
             location=[data.iloc[i]['latitude'],data.iloc[i]['longitude']],
             radius= (data.iloc[i]['tronc_diam']/3.1415)*0.05 + 1,
-            color = colormap(data.iloc[i]['prédictions']) ,
+            fill = True,
+            color = colormap(data.iloc[i]['prediction']),
+            # color = 'red' if (data.iloc[i]['prediction'] == 1) else 'green',
             popup= f'<div style="width : 200px">Position de l\'arbre : {data.iloc[i]['latitude'], data.iloc[i]['longitude']}<br>'
                   f'Remarquable : {data.iloc[i]['remarquable']}<br>'
                   f'Stade de développement : {data.iloc[i]['fk_stadedev']}<br>'
                   f'Etat de l\'arbre : {data.iloc[i]['fk_arb_etat']}<br>'
                   f'Quartier : {data.iloc[i]['clc_quartier']}<br>'
-                  f'Secteur : {data.iloc[i]['clc_secteur']}</div>'
+                  f'Secteur : {data.iloc[i]['clc_secteur']}'
+                  f'Proba d\'être abbatu par la tempète : {data.iloc[i]['prediction']}</div>'
  
         ).add_to(carte)
 
