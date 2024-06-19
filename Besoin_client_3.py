@@ -94,8 +94,8 @@ def real_carte(data):
                   f'Stade de développement : {data.iloc[i]['fk_stadedev']}<br>'
                   f'Etat de l\'arbre : {data.iloc[i]['fk_arb_etat']}<br>'
                   f'Quartier : {data.iloc[i]['clc_quartier']}<br>'
-                  f'Secteur : {data.iloc[i]['clc_secteur']}'
-                  f'Proba d\'être abbatu par la tempète : {data.iloc[i]['prediction']}</div>'
+                  f'Secteur : {data.iloc[i]['clc_secteur']}<br>'
+                  f'Probabilité d\'être déraciné par la tempête : {data.iloc[i]['prediction']}</div>'
  
         ).add_to(carte)
 
