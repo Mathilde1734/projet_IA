@@ -2,6 +2,7 @@ import pandas as pd
 import pickle as pk
 import folium
 from sklearn.preprocessing import OrdinalEncoder
+import branca.colormap as cm
 
 def transformation(df, chemin_json):
     df.to_json(chemin_json)
@@ -16,7 +17,8 @@ def changement(chemin_csv, chemin_json):
     data = read_json(chemin_json)
     return data
 
-arbre = changement('Données/Data_Arbre.csv','Données/Data_Arbre.json')
+# arbre = changement('Données/Data_Arbre.csv','Données/Data_Arbre.json')
+arbre = read_json('Données/Data_Arbre.json')
 
 modele = pk.load(open('RandomForest_Besoin_client_3.pkl','rb'))
 
@@ -42,19 +44,23 @@ def encodeur(data):
 
 
 def predictions(data, modele):
-    encodeur(data)
-    data['Prédictions'] = modele.predict()
+    data_encodee = encodeur(data)
+    data['prédictions'] = modele.predict(data_encodee[['fk_arb_etat']])
     return data
 
 
 
 def real_carte(data):
     carte = folium.Map(zoom_start=12, location=[49.8476780339,3.2866348474000002])
+    colormap = cm.LinearColormap(colors=['green', 'red'])
+    data = predictions(data,modele)
     
+
     for i in (len(data)):
         folium.Circle(
             location=[data.iloc[i]['latitude'],data.iloc[i]['longitude']],
             radius= (data.iloc[i]['tronc_diam']/3.1415)*0.05 + 1,
+            color = colormap(data.iloc[i]['prédictions']) ,
             popup= f'<div style="width : 200px">Position de l\'arbre : {data.iloc[i]['latitude'], data.iloc[i]['longitude']}<br>'
                   f'Remarquable : {data.iloc[i]['remarquable']}<br>'
                   f'Stade de développement : {data.iloc[i]['fk_stadedev']}<br>'
