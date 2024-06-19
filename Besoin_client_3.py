@@ -17,28 +17,19 @@ def changement(chemin_csv, chemin_json):
     data = read_json(chemin_json)
     return data
 
-# arbre = changement('Données/Data_Arbre.csv','Données/Data_Arbre.json')
-arbre = read_json('Données/Data_Arbre.json')
+arbre = changement('Données/Data_Arbre.csv','Données/Data_Arbre.json')
+# arbre = read_json('Données/Data_Arbre.json')
 
-modele = pk.load(open('RandomForest_Besoin_client_3.pkl','rb'))
-
-def encodeur(data):
-    cols_data = ["haut_tot","haut_tronc","tronc_diam","fk_arb_etat","fk_stadedev",
-                 "age_estim", "fk_prec_estim","clc_quartier", "clc_secteur","fk_port",
-                 "fk_pied","fk_situation","fk_revetement","feuillage"]
-    new_data = data[cols_data]
-
-    encodeur = OrdinalEncoder()
-    cols = ["clc_quartier", "clc_secteur","fk_port","fk_pied","fk_situation","fk_revetement","feuillage"]
-    changement = new_data[cols]
-    new_data[cols] = encodeur.fit_transform(changement)
-
-    return new_data
+param = pk.load(open('RandomForest_Besoin_client_3.pkl','rb'))
 
 
-def predictions(data, modele):
-    data_encodee = encodeur(data)
-    data['prédictions'] = modele.predict(data_encodee)
+def encodage(data,param):
+    data_encodee = param['encodeur'].transform(data.drop('fk_arb_etat', axis=1))
+    return data_encodee
+
+def predictions(data, param):
+    data_changee = encodage(data, param)
+    data['prédictions'] = param['modele'].predict(data_changee)
     return data
 
 
@@ -46,7 +37,7 @@ def predictions(data, modele):
 def real_carte(data):
     carte = folium.Map(zoom_start=12, location=[49.8476780339,3.2866348474000002])
     colormap = cm.LinearColormap(colors=['green', 'red'])
-    data = predictions(data,modele)
+    data = predictions(data,param)
     
 
     for i in (len(data)):
