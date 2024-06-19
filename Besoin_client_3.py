@@ -48,7 +48,6 @@ def predictions(data, modele):
 
 
 
-
 def real_carte(data):
     carte = folium.Map(zoom_start=12, location=[49.8476780339,3.2866348474000002])
     
