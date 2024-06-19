@@ -22,6 +22,7 @@ modele = pk.load(open('RandomForest_Besoin_client_3.pkl','rb'))
 
 def encodeur(data):
     new_data = data[["haut_tot","haut_tronc","tronc_diam","fk_arb_etat","fk_stadedev","age_estim", "fk_prec_estim","clc_quartier", "clc_secteur","fk_port","fk_pied","fk_situation","fk_revetement","feuillage"]]
+
     index = new_data[(new_data["fk_arb_etat"] == 'SUPPRIMÉ') | 
              (new_data["fk_arb_etat"]=='ABATTU') | 
              (new_data["fk_arb_etat"]=='EN PLACE') | 
@@ -39,8 +40,9 @@ def encodeur(data):
 
     return new_data
 
-def predictions(data, modele):
 
+def predictions(data, modele):
+    encodeur(data)
     data['Prédictions'] = modele.predict()
     return data
 
