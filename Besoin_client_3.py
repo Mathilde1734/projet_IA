@@ -33,8 +33,6 @@ def encodage(data,param):
     data_prep.drop(index, inplace = True)
 
     data_reduit = data_prep[["haut_tot","haut_tronc","tronc_diam","age_estim", "fk_prec_estim","fk_pied","fk_situation"]]
-    print(len(data_reduit))
-    print(len(data))
     columns_enc=["fk_pied","fk_situation"]
     data_reduit[columns_enc] = param['encodeur'].transform(data_reduit[columns_enc])
 
@@ -96,8 +94,8 @@ def real_carte(data):
                   f'Stade de développement : {data.iloc[i]['fk_stadedev']}<br>'
                   f'Etat de l\'arbre : {data.iloc[i]['fk_arb_etat']}<br>'
                   f'Quartier : {data.iloc[i]['clc_quartier']}<br>'
-                  f'Secteur : {data.iloc[i]['clc_secteur']}'
-                  f'Proba d\'être abbatu par la tempète : {data.iloc[i]['prediction']}</div>'
+                  f'Secteur : {data.iloc[i]['clc_secteur']}<br>'
+                  f'Probabilité d\'être déraciné par la tempête : {data.iloc[i]['prediction']}</div>'
  
         ).add_to(carte)
 
