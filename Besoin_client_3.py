@@ -4,13 +4,16 @@ import folium
 from sklearn.preprocessing import OrdinalEncoder
 import branca.colormap as cm
 
+# Trnaformation d'un dataFrame en format json
 def transformation(df, chemin_json):
     df.to_json(chemin_json)
 
+# Lecture du dataFrame en json
 def read_json(chemin_json):
     data_json = pd.read_json(chemin_json)
     return data_json
 
+# Prend un fichier csv et le transforme en fichier json
 def changement(chemin_csv, chemin_json):
     df = pd.read_csv(chemin_csv)
     transformation(df, chemin_json)
