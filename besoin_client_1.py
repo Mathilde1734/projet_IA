@@ -6,7 +6,6 @@ from sklearn.ensemble import IsolationForest
 import seaborn as sns
 import plotly.express as px
 import matplotlib.pyplot as plt
-import plotly.io as pio
 
 def apply_clustering(data, n_clusters):
     # Initialisation du modèle KMeans avec le nombre de clusters spécifié
@@ -61,31 +60,19 @@ def visualize_tree_clusters(file_path, n_clusters):
     # Ajuster les tailles pour l'affichage sur la carte
     data['size'] = data['haut_tot'] - data['haut_tot'].min() + 1  # Décalage pour avoir des tailles positives
     
-    # Création de la figure interactive avec Plotly Express pour les hauteurs totales
-    fig1 = px.scatter_mapbox(data, 
-                             lat='latitude', 
-                             lon='longitude', 
-                             color='cluster',  # Coloration par les clusters
-                             size='size',  # Taille basée sur la hauteur totale normalisée
-                             color_continuous_scale=px.colors.sequential.Plasma, 
-                             size_max=10, 
-                             zoom=10, 
-                             mapbox_style="open-street-map")
-    # Création de la figure interactive avec Plotly Express pour les anomalies
-    fig2 = px.scatter_mapbox(data, 
-                             lat='latitude', 
-                             lon='longitude', 
-                             color='anomaly',  # Coloration par les anomalies détectées
-                             size='size',  # Taille basée sur la hauteur totale normalisée
-                             hover_data=['cluster'],  # Informations supplémentaires au survol
-                             color_discrete_map={'Normal': 'blue', 'Anomaly': 'red'}, 
-                             size_max=10, 
-                             zoom=10, 
-                             mapbox_style="open-street-map")
+    # Création de la figure interactive avec Plotly Express
+    fig = px.scatter_mapbox(data, 
+                            lat='latitude', 
+                            lon='longitude', 
+                            color='anomaly',  # Coloration par les anomalies détectées
+                            size='size',  # Taille basée sur la hauteur totale normalisée
+                            hover_data=['cluster'],  # Informations supplémentaires au survol
+                            color_discrete_map={'Normal': 'blue', 'Anomaly': 'red'},  # Couleurs des points
+                            size_max=10,  # Taille maximale des points sur la carte
+                            zoom=10,  # Zoom initial de la carte
+                            mapbox_style="open-street-map")  # Style de la carte (OpenStreetMap)
     
-    # Affichage des cartes interactives
-    pio.show(fig1)
-    pio.show(fig2)
+    fig.show()
     
     return data, scaler
     
