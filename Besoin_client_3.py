@@ -138,10 +138,10 @@ def real_carte(data):
 if __name__ =="__main__":
 
     arbre = changement('Données/Data_Arbre.csv','Données/Data_Arbre.json')
-    meteo = changement('Données/données_météo.csv','Données/données_météo.json')
+    # meteo = changement('Données/données_météo.csv','Données/données_météo.json')
     param = pk.load(open('RandomForest_Besoin_client_3.pkl','rb'))
 
-    importation()
+    # importation()
 
     # Affichage de la carte
     truc = real_carte(arbre)
